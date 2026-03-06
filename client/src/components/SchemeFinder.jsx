@@ -49,7 +49,7 @@ const SchemeFinder = ({ user, onBack, schemes: propSchemes, onSaveScheme, onRemo
     setHasSearched(true);
     
     try {
-      const res = await axios.get('http://localhost:5000/api/schemes');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/schemes`);
       const allDbSchemes = res.data.schemes || [];
       const exactAge = calculateExactAge(formData.dob);
 

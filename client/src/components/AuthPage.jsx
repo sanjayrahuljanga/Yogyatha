@@ -41,7 +41,7 @@ const AuthPage = ({ onLogin }) => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
                 email: formData.email,
                 password: formData.password
             });
@@ -60,7 +60,7 @@ const AuthPage = ({ onLogin }) => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/register', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
                 name: formData.name,
                 email: formData.email,
                 password: formData.password,
@@ -84,7 +84,7 @@ const AuthPage = ({ onLogin }) => {
         setError('');
         setSuccessMsg('');
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/forgot-password', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/forgot-password`, {
                 email: formData.email
             });
             setSuccessMsg(res.data.msg);
@@ -102,7 +102,7 @@ const AuthPage = ({ onLogin }) => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/reset-password', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
                 email: formData.email,
                 otp: formData.otp,
                 newPassword: formData.newPassword

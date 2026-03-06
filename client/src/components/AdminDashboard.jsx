@@ -48,14 +48,14 @@ const AdminDashboard = ({ onLogout }) => {
 
   const fetchSchemes = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/schemes');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/schemes`);
       setSchemes(res.data.schemes);
     } catch (err) { console.error(err); }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/all-users', { headers: getAuthHeader() });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/all-users`, { headers: getAuthHeader() });
       // 🎯 Safe Check: Ensures it's always an array before setting state
       const usersArray = Array.isArray(res.data) ? res.data : (res.data.users || []);
       setUsers(usersArray);
@@ -82,7 +82,7 @@ const AdminDashboard = ({ onLogout }) => {
         try {
             const token = localStorage.getItem('token');
             const config = { headers: { 'x-auth-token': token, 'Authorization': `Bearer ${token}` } };
-            const res = await axios.post('http://localhost:5000/api/schemes/scrape-url', { url: scrapeUrl }, config);
+           const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/schemes/scrape-url`, { url: scrapeUrl }, config);
             
             const safeFormat = (item) => {
                 if (!item) return '';
@@ -154,10 +154,9 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const config = { headers: getAuthHeader() };
       if (editingId) {
-          await axios.put(`http://localhost:5000/api/schemes/${editingId}`, payload, config);
-          alert("✅ Intelligence Updated!");
+          await axios.put(`${import.meta.env.VITE_API_URL}/api/schemes/${editingId}`, payload, config);
       } else {
-          await axios.post('http://localhost:5000/api/schemes', payload, config);
+          await axios.post(`${import.meta.env.VITE_API_URL}/api/schemes`, payload, config);
           alert("✅ Intelligence Saved!");
       }
       fetchSchemes();
@@ -173,8 +172,7 @@ const AdminDashboard = ({ onLogout }) => {
     e.stopPropagation(); 
     if(!window.confirm("Delete this scheme?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/schemes/${id}`, { headers: getAuthHeader() });
-      fetchSchemes();
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/schemes/${id}`, { headers: getAuthHeader() });
     } catch (err) { alert("Failed to delete."); }
   };
 
@@ -182,7 +180,7 @@ const AdminDashboard = ({ onLogout }) => {
       e.preventDefault();
       if(!newAdminEmail) return;
       try {
-          const res = await axios.post('http://localhost:5000/api/auth/make-admin', { identifier: newAdminEmail }, { headers: getAuthHeader() });
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/make-admin`, { identifier: newAdminEmail }, { headers: getAuthHeader() });
           alert(`👑 ${res.data.msg}`);
           setNewAdminEmail('');
           fetchUsers();
