@@ -60,7 +60,7 @@ const Login = ({ onLogin }) => {
             const user = result.user;
             
             // Sync with your Node.js Backend
-            const res = await axios.post('http://localhost:5000/api/auth/phone-login', {
+           const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/phone-login`, {
                 phone: user.phoneNumber,
                 uid: user.uid
             });
@@ -89,7 +89,7 @@ const Login = ({ onLogin }) => {
         setLoading(true);
         try {
             // Adjust this URL if your admin login route is different!
-            const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+           const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
             
             if (!res.data.user.isAdmin) {
                 alert("Unauthorized. This portal is for Administrators only.");

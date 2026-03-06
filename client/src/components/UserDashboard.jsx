@@ -31,7 +31,7 @@ const UserDashboard = ({ user, onLogout, onUpdateUser }) => {
 
       const query = `?gender=${currentUser.gender || 'All'}&age=${currentUser.age || ''}&isDifferentlyAbled=${currentUser.isDifferentlyAbled || 'All'}&state=${currentUser.state || 'All'}`;
       
-      const res = await axios.get(`http://localhost:5000/api/schemes${query}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/schemes${query}`);
       
       if (res.data && res.data.schemes) {
           setAllSchemesList(res.data.schemes);
