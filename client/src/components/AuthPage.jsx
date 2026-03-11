@@ -68,7 +68,10 @@ const AuthPage = ({ onLogin }) => {
                 state: formData.state
             });
             // Auto-login after successful registration
-            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('yogyatha-session', JSON.stringify({
+    token: res.data.token,
+    user: res.data.user
+}));
             onLogin(res.data.user);
         } catch (err) {
             setError(err.response?.data?.msg || 'Registration failed');
