@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 // DB Connection
-mongoose.connect(process.env.MONGODB_URI, 'mongodb+srv://sanjayrahulsanjayrahul5_db_user:kxq3Zz84vbjFg4uC@cluster0.cf7hb6r.mongodb.net/yogyatha?appName=Cluster0a')
+mongoose.connect(process.env.MONGODB_URI, 'mongodb+srv://sanjayrahulsanjayrahul5_db_user:kxq3Zz84vbjFg4uC@cluster0.cf7hb6r.mongodb.net/yogyatha?appName=Cluster0')
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.log('❌ DB Error:', err));
 
