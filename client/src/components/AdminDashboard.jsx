@@ -34,17 +34,31 @@ const AdminDashboard = ({ onLogout }) => {
   ];
 
   useEffect(() => {
-    fetchSchemes();
-    fetchUsers();
-  }, []);
+    // 🛡️ THE SECURITY BOUNCER
+    const sessionData = JSON.parse(localStorage.getItem('yogyatha-session') || '{}');
+    const user = sessionData.user;
+    
+    if (!user || user.isAdmin !== true) {
+        alert("🚨 SECURITY BREACH: Unauthorized access detected. Returning to Citizen Portal.");
+        onLogout();
+        navigate('/');
+        return; // Stop the code right here!
+    }
+
+    fetchSchemes();
+    fetchUsers();
+  }, []);
 
   const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
-    return token ? { 
-        'x-auth-token': token,
-        'Authorization': `Bearer ${token}` 
-    } : {};
-  };
+    // Extract token from the new standardized session object
+    const sessionData = JSON.parse(localStorage.getItem('yogyatha-session') || '{}');
+    const token = sessionData.token;
+    
+    return token ? { 
+        'x-auth-token': token,
+        'Authorization': `Bearer ${token}` 
+    } : {};
+  };
 
   const fetchSchemes = async () => {
     try {
