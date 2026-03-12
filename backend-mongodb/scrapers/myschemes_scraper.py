@@ -1,7 +1,7 @@
 import sys, json, os, time, re
 import warnings
 
-sys.stderr = open(os.devnull, 'w')
+
 os.environ['WDM_LOG_LEVEL'] = '0'
 warnings.filterwarnings("ignore")
 
