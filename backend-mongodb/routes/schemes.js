@@ -89,7 +89,7 @@ router.post('/scrape-url', auth, (req, res) => {
 
     console.log(`🚀 Scraping Specific URL: ${url}`);
 
-    const scriptPath = path.join(__dirname, '..', 'scrapers', 'single_scheme_scraper.py');
+   const scriptPath = path.join(__dirname, '..', 'scrapers', 'myschemes_scraper.py');
     const pythonCommand = process.platform === "win32" ? "python" : "python3";
     
     let pythonProcess;
