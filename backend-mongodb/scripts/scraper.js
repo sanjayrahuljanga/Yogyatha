@@ -10,7 +10,7 @@ const scrapeSchemes = async () => {
 
   try {
     // 1. Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/yogyatha');
+    await mongoose.connect(process.env.MONGO_URI );
     console.log("✅ Connected to Database. Fetching new schemes...");
 
     // 2. THE SCRAPING LOGIC (Simulated for Demo)
