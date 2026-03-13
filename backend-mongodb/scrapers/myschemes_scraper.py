@@ -69,21 +69,32 @@ def scrape(url):
 
         page_text = driver.execute_script("return document.body.innerText;")
 
-        # 2. SECTION SPLITTER
-        headers = ["Benefits", "Eligibility", "Application Process", "Documents Required", "Frequently Asked Questions"]
-        pattern = r'(?i)(?:^|\n)(' + '|'.join(headers) + r')\s*\n(.*?)(?=(?:\n(?:' + '|'.join(headers) + r')\s*\n)|$)'
-        matches = re.findall(pattern, page_text, re.DOTALL)
-        sections = {m[0].strip().lower(): m[1].strip() for m in matches}
+        # 2. BULLETPROOF LINE-BY-LINE SPLITTER
+        # (I added Exclusions to the list so it doesn't accidentally bleed into Eligibility!)
+        headers = ["Benefits", "Eligibility", "Exclusions", "Application Process", "Documents Required", "Frequently Asked Questions"]
+        
+        sections = {h.lower(): [] for h in headers}
+        current_section = None
+        
+        for line in page_text.split('\n'):
+            clean_line = line.strip()
+            # Ignore empty lines or the random "Details" tab text
+            if not clean_line or clean_line.lower() == "details":
+                continue
+                
+            # Check if this exact line is one of our main headers
+            matched_header = next((h for h in headers if clean_line.lower() == h.lower()), None)
+            
+            if matched_header:
+                current_section = matched_header.lower()
+            elif current_section:
+                # If we are currently "inside" a section, save the text!
+                sections[current_section].append(clean_line)
 
-        benefits = sections.get("benefits", "")
-        eligibility = sections.get("eligibility", "")
-        app_process = sections.get("application process", "")
-        docs = sections.get("documents required", "")
-
-        if not benefits and not eligibility:
-            p_elements = driver.find_elements(By.XPATH, "//p | //li")
-            fallback_text = "\n".join([el.text.strip() for el in p_elements if len(el.text.strip()) > 20])
-            benefits = "RAW TEXT EXTRACT:\n" + fallback_text[:2000]
+        benefits = "\n".join(sections["benefits"])
+        eligibility = "\n".join(sections["eligibility"])
+        app_process = "\n".join(sections["application process"])
+        docs = "\n".join(sections["documents required"])
 
         full_description = ""
         if benefits: full_description += f"BENEFITS:\n{benefits}\n\n"
