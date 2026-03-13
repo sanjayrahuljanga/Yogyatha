@@ -34,6 +34,10 @@ def scrape(url):
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
+    # 🛡️ THE TROJAN HORSE: Find the secretly downloaded Chrome binary on Render
+    chrome_path = glob.glob(os.path.join(os.getcwd(), 'chrome', '**', 'chrome-linux64', 'chrome'), recursive=True)
+    if chrome_path:
+        chrome_options.binary_location = chrome_path[0] # Force Selenium to use our portable Chrome!
     driver = None
     try:
         service = Service(ChromeDriverManager().install())
