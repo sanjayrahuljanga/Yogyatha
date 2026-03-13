@@ -36,7 +36,7 @@ def scrape(url):
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-    # 1. Locate the smuggled Chrome car
+    # 1. Locate the smuggled Chrome car (Cloud Mode)
     chrome_paths = glob.glob(os.path.join(os.getcwd(), 'chrome', '**', 'chrome-linux64', 'chrome'), recursive=True)
     if chrome_paths:
         chrome_options.binary_location = chrome_paths[0]
@@ -53,42 +53,44 @@ def scrape(url):
             service = Service(ChromeDriverManager().install()) #local mode
             
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        # 1. SMART TITLE WAIT
-        # Wait until the invisible tab title updates to contain the scheme name
-        wait = WebDriverWait(driver, 15)
-        try:
-            wait.until(lambda d: len(d.title) > 10 and "|" in d.title)
-            name = driver.title.split("|")[0].strip()
-        except:
-            try:
-                name = driver.find_element(By.TAG_NAME, "h1").text.strip()
-            except:
-                name = "Manual Entry Required"
+        
+        driver.get(url)
 
-        time.sleep(2) # Extra buffer for the text to settle
+        # 1. THE TACTICAL PAUSE (Beat the Ghost DOM)
+        # Force the sniper to hold its breath for 4 seconds so the React page fully loads
+        time.sleep(4) 
+
+        try:
+            name = driver.find_element(By.TAG_NAME, "h1").text.strip()
+            if not name: name = driver.title.split("|")[0].strip()
+        except:
+            name = "Manual Entry Required"
 
         page_text = driver.execute_script("return document.body.innerText;")
 
-        # 2. BULLETPROOF LINE-BY-LINE SPLITTER
-        # (I added Exclusions to the list so it doesn't accidentally bleed into Eligibility!)
+        # 2. THERMAL FUZZY SPLITTER (Beat the Dirty Formatting)
         headers = ["Benefits", "Eligibility", "Exclusions", "Application Process", "Documents Required", "Frequently Asked Questions"]
-        
         sections = {h.lower(): [] for h in headers}
         current_section = None
         
         for line in page_text.split('\n'):
             clean_line = line.strip()
-            # Ignore empty lines or the random "Details" tab text
-            if not clean_line or clean_line.lower() == "details":
+            # Ignore empty lines or UI tabs
+            if not clean_line or clean_line.lower() in ["details", "check eligibility"]:
                 continue
                 
-            # Check if this exact line is one of our main headers
-            matched_header = next((h for h in headers if clean_line.lower() == h.lower()), None)
+            # Fuzzy Match: If the line is short (under 50 chars) and CONTAINS our header word
+            matched_header = None
+            if len(clean_line) < 50: 
+                for h in headers:
+                    if h.lower() in clean_line.lower():
+                        matched_header = h
+                        break
             
             if matched_header:
                 current_section = matched_header.lower()
             elif current_section:
-                # If we are currently "inside" a section, save the text!
+                # If we are inside a section, capture the intel
                 sections[current_section].append(clean_line)
 
         benefits = "\n".join(sections["benefits"])
@@ -102,7 +104,6 @@ def scrape(url):
 
         # 3. TARGETED STATE RADAR
         state_guess = "All India"
-        # Only look in Eligibility and Documents so we don't get confused by random cities mentioned in the text
         for state in INDIAN_STATES:
             if state.lower() in eligibility.lower() or state.lower() in docs.lower():
                 state_guess = state
@@ -112,18 +113,19 @@ def scrape(url):
         page_lower = page_text.lower()
         if any(word in page_lower for word in ["student", "degree", "education", "scholarship"]):
             category_guess = "Education"
-        elif any(word in page_lower for word in ["farmer", "agriculture", "crop"]):
+        elif any(word in page_lower for word in ["farmer", "agriculture", "crop", "irrigation"]):
             category_guess = "Agriculture"
         elif any(word in page_lower for word in ["maternity", "pregnant", "health", "hospital", "disease"]):
             category_guess = "Healthcare"
         elif any(word in page_lower for word in ["pilgrimage", "teerth", "yatra", "temple"]):
             category_guess = "Social Welfare"
+        elif any(word in page_lower for word in ["energy", "solar", "electricity"]):
+            category_guess = "Infrastructure"
         else:
             category_guess = "General"
 
         # 5. DEEP INCOME DECODER
         income_limit = ""
-        # Search BOTH eligibility and documents for income clues
         search_area = eligibility.lower() + " " + docs.lower() + " " + benefits.lower()
 
         num_match = re.search(r'(?:₹|rs\.?)\s*([0-9,]+)', search_area)
@@ -138,7 +140,7 @@ def scrape(url):
         elif "bpl" in search_area or "below poverty line" in search_area:
             income_limit = "100000"
         elif "income taxpayer" in search_area or "pay income tax" in search_area:
-            income_limit = "500000" # Standard assumption for tax exemption limits
+            income_limit = "500000"
 
         scheme_data = {
             "name": name,
