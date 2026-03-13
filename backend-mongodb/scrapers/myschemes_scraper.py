@@ -48,9 +48,9 @@ def scrape(url):
     try:
         # If we are on Render, use the smuggled driver. If on local Windows, use standard webdriver-manager!
         if driver_paths:
-            service = Service(executable_path=driver_paths[0])
+            service = Service(executable_path=driver_paths[0]) #cloud mode
         else:
-            service = Service(ChromeDriverManager().install())
+            service = Service(ChromeDriverManager().install()) #local mode
             
         driver = webdriver.Chrome(service=service, options=chrome_options)
         # 1. SMART TITLE WAIT
