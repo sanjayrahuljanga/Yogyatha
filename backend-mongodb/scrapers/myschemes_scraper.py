@@ -70,6 +70,7 @@ def scrape(url):
 
         # 2. THERMAL FUZZY SPLITTER (Beat the Dirty Formatting)
         headers = ["Benefits", "Eligibility", "Exclusions", "Application Process", "Documents Required", "Frequently Asked Questions"]
+        
         sections = {h.lower(): [] for h in headers}
         current_section = None
         
@@ -102,10 +103,10 @@ def scrape(url):
         if benefits: full_description += f"BENEFITS:\n{benefits}\n\n"
         if eligibility: full_description += f"ELIGIBILITY:\n{eligibility}"
 
-        # 3. TARGETED STATE RADAR
+        # 3. ADVANCED STATE RADAR
         state_guess = "All India"
         for state in INDIAN_STATES:
-            if state.lower() in eligibility.lower() or state.lower() in docs.lower():
+            if state.lower() in page_text.lower():
                 state_guess = state
                 break
 
@@ -124,35 +125,62 @@ def scrape(url):
         else:
             category_guess = "General"
 
-        # 5. DEEP INCOME DECODER
+        # 5. DEMOGRAPHIC RADAR (Gender & Disability)
+        gender_guess = "All"
+        if any(word in page_lower for word in ["women", "female", "girl", "maternity", "widow", "daughter", "mother"]):
+            gender_guess = "Female"
+        elif any(word in page_lower for word in ["boy", "male"]):
+            gender_guess = "Male"
+
+        disability_guess = "All"
+        if any(word in page_lower for word in ["disabled", "differently abled", "pwd", "handicapped", "blind", "deaf", "special needs"]):
+            disability_guess = "Yes"
+
+        # 6. PRECISION AGE DECODER
+        min_age = 0
+        max_age = 100
+        age_match = re.search(r'([0-9]{1,2})\s*(?:-|to|and)\s*([0-9]{1,2})\s*years?', page_lower)
+        if age_match:
+            min_age = int(age_match.group(1))
+            max_age = int(age_match.group(2))
+        else:
+            min_match = re.search(r'minimum.*?age.*?([0-9]{1,2})', page_lower)
+            if min_match: min_age = int(min_match.group(1))
+            max_match = re.search(r'maximum.*?age.*?([0-9]{1,2})', page_lower)
+            if max_match: max_age = int(max_match.group(1))
+
+        # 7. PRECISION INCOME DECODER
         income_limit = ""
-        search_area = eligibility.lower() + " " + docs.lower() + " " + benefits.lower()
-
-        num_match = re.search(r'(?:₹|rs\.?)\s*([0-9,]+)', search_area)
-        lakh_match = re.search(r'([0-9.]+)\s*lakh', search_area)
-
-        if num_match:
-            income_limit = num_match.group(1).replace(',', '')
-        elif lakh_match:
+        income_area = eligibility.lower()
+        
+        lakh_match = re.search(r'([0-9.]+)\s*lakh', income_area)
+        if lakh_match:
             income_limit = str(int(float(lakh_match.group(1)) * 100000))
-        elif "ews" in search_area or "economically weaker" in search_area:
+        elif "ews" in income_area or "economically weaker" in income_area:
             income_limit = "800000"
-        elif "bpl" in search_area or "below poverty line" in search_area:
+        elif "bpl" in income_area or "below poverty line" in income_area:
             income_limit = "100000"
-        elif "income taxpayer" in search_area or "pay income tax" in search_area:
+        elif "income taxpayer" in income_area or "pay income tax" in income_area:
             income_limit = "500000"
+        else:
+            inc_match = re.search(r'income.*?(?:₹|rs\.?)\s*([0-9,]+)', income_area)
+            if inc_match:
+                income_limit = inc_match.group(1).replace(',', '')
 
+        # 8. THE PAYLOAD ASSEMBLY
         scheme_data = {
             "name": name,
             "link": url,
             "category": category_guess,
             "state": state_guess,
-            "minAge": 18,
-            "maxAge": 60,
-            "incomeLimit": income_limit,
             "description": full_description.strip(),
             "requiredDocs": docs,
-            "applicationSteps": app_process
+            "applicationSteps": app_process,
+            "minAge": min_age,
+            "maxAge": max_age,
+            "incomeLimit": income_limit,
+            "targetGender": gender_guess,
+            "targetDifferentlyAbled": disability_guess
         }
 
         print(json.dumps(scheme_data))
