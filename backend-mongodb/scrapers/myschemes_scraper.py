@@ -26,24 +26,33 @@ INDIAN_STATES = [
 ]
 
 def scrape(url):
+
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage") # 🛡️ CRITICAL LINUX SHIELD
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-    # 🛡️ THE TROJAN HORSE: Find the secretly downloaded Chrome binary on Render
-    chrome_path = glob.glob(os.path.join(os.getcwd(), 'chrome', '**', 'chrome-linux64', 'chrome'), recursive=True)
-    if chrome_path:
-        chrome_options.binary_location = chrome_path[0] # Force Selenium to use our portable Chrome!
+    # 1. Locate the smuggled Chrome car
+    chrome_paths = glob.glob(os.path.join(os.getcwd(), 'chrome', '**', 'chrome-linux64', 'chrome'), recursive=True)
+    if chrome_paths:
+        chrome_options.binary_location = chrome_paths[0]
+
+    # 2. Locate the smuggled matching steering wheel (ChromeDriver)
+    driver_paths = glob.glob(os.path.join(os.getcwd(), 'chromedriver', '**', 'chromedriver-linux64', 'chromedriver'), recursive=True)
+
     driver = None
     try:
-        service = Service(ChromeDriverManager().install())
+        # If we are on Render, use the smuggled driver. If on local Windows, use standard webdriver-manager!
+        if driver_paths:
+            service = Service(executable_path=driver_paths[0])
+        else:
+            service = Service(ChromeDriverManager().install())
+            
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get(url)
-
         # 1. SMART TITLE WAIT
         # Wait until the invisible tab title updates to contain the scheme name
         wait = WebDriverWait(driver, 15)
