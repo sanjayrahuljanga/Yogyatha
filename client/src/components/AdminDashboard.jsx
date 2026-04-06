@@ -184,12 +184,19 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   const handleDelete = async (id, e) => {
-    e.stopPropagation(); 
-    if(!window.confirm("Delete this scheme?")) return;
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/schemes/${id}`, { headers: getAuthHeader() });
-    } catch (err) { alert("Failed to delete."); }
-  };
+    e.stopPropagation(); 
+    if(!window.confirm("Delete this scheme?")) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/schemes/${id}`, { headers: getAuthHeader() });
+      
+      // 🎯 THE FIX: Force the dashboard to refresh its data!
+      fetchSchemes(); 
+      
+    } catch (err) { 
+      console.error("Deletion Error:", err.response?.data || err.message);
+      alert("Failed to delete. Check console for details."); 
+    }
+  };
 
   const handleMakeAdmin = async (e) => {
       e.preventDefault();
