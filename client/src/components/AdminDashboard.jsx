@@ -105,20 +105,21 @@ const AdminDashboard = ({ onLogout }) => {
             };
 
             setForm({
-                ...emptyForm,
-                name: res.data.name || res.data.title || '',
-                link: scrapeUrl,
-                category: res.data.category || 'General',
-                state: res.data.state || 'All India',
-                description: res.data.description || '',
-                requiredDocs: safeFormat(res.data.requiredDocs),
-                applicationSteps: safeFormat(res.data.applicationSteps),
-                minAge: res.data.rules?.minAge || 0,
-                maxAge: res.data.rules?.maxAge || 100,
-                incomeLimit: res.data.rules?.incomeLimit || '',
-                targetGender: res.data.rules?.targetGender || 'All',
-                targetDifferentlyAbled: res.data.rules?.targetDifferentlyAbled || 'All'
-            });
+                ...emptyForm,
+                name: res.data.name || res.data.title || '',
+                link: scrapeUrl,
+                category: res.data.category || 'General',
+                state: res.data.state || 'All India',
+                description: res.data.description || '',
+                requiredDocs: safeFormat(res.data.requiredDocs),
+                applicationSteps: safeFormat(res.data.applicationSteps),
+                // 🎯 THE RADAR CATCHERS: Updated to catch the new Python payload
+                minAge: res.data.minAge || res.data.rules?.minAge || 0,
+                maxAge: res.data.maxAge || res.data.rules?.maxAge || 100,
+                incomeLimit: res.data.incomeLimit || res.data.rules?.incomeLimit || '',
+                targetGender: res.data.targetGender || res.data.rules?.targetGender || 'All',
+                targetDifferentlyAbled: res.data.targetDifferentlyAbled || res.data.rules?.targetDifferentlyAbled || 'All'
+            });
             alert("✅ Data Extracted!");
         } catch (err) { 
             alert(`SCRAPER ERROR: ${err.response?.data?.msg || err.message}`); 
